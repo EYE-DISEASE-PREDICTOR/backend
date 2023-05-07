@@ -39,6 +39,11 @@ class LoginSerializer(serializers.Serializer):
             raise AttributeError("Must include username and password")
         return attrs
     
+    def to_representation(self, instance):
+        data =  super().to_representation(instance)
+        data['user_id'] = instance.id
+        return data
+
 
 class ProjectUserSerializer(serializers.ModelSerializer):
 
