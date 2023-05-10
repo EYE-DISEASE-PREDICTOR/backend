@@ -4,6 +4,7 @@ from . import serializer as eye_serializer
 from . import models as eye_models
 from account import models  as account_models 
 from rest_framework.response import Response
+from eye import constants as eye_constants
 from tensorflow import keras
 import cv2
 import numpy as np
@@ -29,12 +30,13 @@ class EyeCheckView(views.APIView):
             return Response({"message":"enter eye id"})
         
         file_path = os.path.join(BASE_DIR, 'h5/efficientnetb3-Eye Disease-93.84.h5')
-        model = keras.models.load_model(file_path)
+        Model = keras.models.load_model(file_path)
         x=cv2.imread(image_path)
         x = cv2.resize(x,(224,224))     # resize image to match model's expected sizing
         x= x.reshape(1,224,224,3)
-        preds = model.predict_generator(x)
+        preds = Model.predict(x)
         y_pred = np.argmax(preds, axis=1)
         eye.condition = y_pred
+        data = {"result":eye_constants.EyeCondition(y_pred).label}
         eye.save()
-        return Response(y_pred)
+        return Response(data)
